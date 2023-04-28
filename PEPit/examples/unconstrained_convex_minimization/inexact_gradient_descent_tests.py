@@ -3,7 +3,7 @@ from PEPit.functions import SmoothStronglyConvexFunction
 from PEPit.primitive_steps import inexact_gradient_step
 
 
-def wc_inexact_gradient_descent(L, mu, epsilon, n, verbose=1):
+def wc_inexact_gradient_descent(L, mu, gamma, epsilon, n, verbose=1):
     """
     Consider the convex minimization problem
 
@@ -109,7 +109,7 @@ def wc_inexact_gradient_descent(L, mu, epsilon, n, verbose=1):
     # Run n steps of the inexact gradient method
     Leps = (1 + epsilon) * L
     meps = (1 - epsilon) * mu
-    gamma = 2 / (Leps + meps)
+    #gamma = 2 / (Leps + meps)
 
     x = x0
     for i in range(n):
@@ -136,4 +136,4 @@ def wc_inexact_gradient_descent(L, mu, epsilon, n, verbose=1):
 
 
 if __name__ == "__main__":
-    pepit_tau, theoretical_tau = wc_inexact_gradient_descent(L=1, mu=.1, epsilon=.1, n=2, verbose=1)
+    pepit_tau, theoretical_tau = wc_inexact_gradient_descent(L=1, mu=.1, gamma= 0.1, epsilon=.1, n=2, verbose=1)

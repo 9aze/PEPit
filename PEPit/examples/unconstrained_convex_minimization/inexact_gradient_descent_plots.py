@@ -1,8 +1,8 @@
 from PEPit import PEP
 from PEPit.functions import SmoothStronglyConvexFunction
 from PEPit.primitive_steps import inexact_gradient_step
-
-
+import numpy as np
+import matplotlib.pyplot as plt
 def wc_inexact_gradient_descent(L, mu, gamma, epsilon, n, verbose=1):
     """
     Consider the convex minimization problem
@@ -123,8 +123,12 @@ def wc_inexact_gradient_descent(L, mu, gamma, epsilon, n, verbose=1):
     pepit_tau = problem.solve(verbose=pepit_verbose)
 
     # Compute theoretical guarantee (for comparison)
-    theoretical_tau = ((Leps - meps) / (Leps + meps)) ** (2 * n)
-
+    gamma_eps=2/(Leps+meps)
+    if gamma <= gamma_eps:
+        theoretical_tau = (1-gamma*meps)**(2*n)
+    else :
+        theoretical_tau= (Leps*gamma-1)**(2*n)
+    
     # Print conclusion if required
     if verbose != -1:
         print('*** Example file: worst-case performance of inexact gradient method in distance in function values ***')
@@ -135,5 +139,56 @@ def wc_inexact_gradient_descent(L, mu, gamma, epsilon, n, verbose=1):
     return pepit_tau, theoretical_tau
 
 
+
+
+
+def wc_inexact_gradient_descent_plot(L, mu, epsilon, n):
+    Leps=L*(1+epsilon)
+    meps=mu*(1-epsilon)
+    gamma_eps=2/(Leps+meps)
+    gamma_liste=np.arange(0,2*gamma_eps,2*gamma_eps/20)
+    pepit_tau_liste=[]
+    theoretical_tau_liste=[]
+    for gamma in gamma_liste:
+        pepit_tau, theoretical_tau=wc_inexact_gradient_descent(L,mu,gamma,epsilon,n, verbose=1)
+        pepit_tau_liste.append(pepit_tau)
+        theoretical_tau_liste.append(theoretical_tau)
+    plt.plot(gamma_liste, pepit_tau_liste, 'o', label='pepit_tau')
+    plt.plot(gamma_liste, theoretical_tau_liste, label='theoretical_tau')
+    plt.title(f'Evolution of pepit and theoretical tau for epsilon={epsilon}')
+    plt.xlabel('gamma')
+    plt.legend()
+    plt.show()
+
+def wc_inexact_gradient_descent_multiple_plot(L, mu, n):
+    i=2
+    j=3
+    epsilon_liste=np.arange(0,1,1/(i*j+1))
+    figure, axis = plt.subplots(i, j, figsize=(20,20))
+    for i_ in range(i):
+        for j_ in range(j):
+            epsilon=epsilon_liste[(i_+1)+j_*i]
+            Leps=L*(1+epsilon)
+            meps=mu*(1-epsilon)
+            gamma_eps=2/(Leps+meps)
+            gamma_liste=np.arange(0,2*gamma_eps,2*gamma_eps/20)
+            pepit_tau_liste=[]
+            theoretical_tau_liste=[]
+            for gamma in gamma_liste:
+                pepit_tau, theoretical_tau=wc_inexact_gradient_descent(L,mu,gamma,epsilon,n, verbose=1)
+                pepit_tau_liste.append(pepit_tau)
+                theoretical_tau_liste.append(theoretical_tau)
+            axis[i_, j_].plot(gamma_liste, pepit_tau_liste, 'o', label='pepit_tau')
+            axis[i_,j_].plot(gamma_liste, theoretical_tau_liste, label='theoretical_tau')
+            axis[i_,j_].set_title(f'epsilon={epsilon:.2f}')
+            axis[i_,j_].set_xlabel('gamma')
+            plt.legend()
+    plt.show()
+
 if __name__ == "__main__":
-    pepit_tau, theoretical_tau = wc_inexact_gradient_descent(L=1, mu=.1, gamma= 0.1, epsilon=.1, n=2, verbose=1)
+    pepit_tau, theoretical_tau = wc_inexact_gradient_descent(L=1, mu=.1, gamma= 0.1, epsilon=.1, n=7, verbose=1)
+    #wc_inexact_gradient_descent_plot(L=1, mu=0.1, epsilon=.1, n=1)
+    wc_inexact_gradient_descent_multiple_plot(L=1, mu=0.1, n=1)
+
+
+
